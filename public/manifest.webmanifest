@@ -1,0 +1,17 @@
+{
+  "name": "Etsy → Shopify Migrator",
+  "short_name": "Etsy2Shopify",
+  "description": "Fill your Shopify shop from your Etsy shop in one click.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1419",
+  "theme_color": "#2f6f4f",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

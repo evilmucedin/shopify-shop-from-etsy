@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2f6f4f" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="stylesheet" href="/style.css" />
+    <title>Etsy → Shopify Migrator</title>
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <h1>Etsy&nbsp;→&nbsp;Shopify</h1>
+        <p class="tagline">Fill your Shopify shop from your Etsy shop in one click.</p>
+      </header>
+
+      <form id="creds-form" autocomplete="off">
+        <fieldset>
+          <legend>Etsy (source)</legend>
+          <label>API key<input name="etsyApiKey" type="password" required /></label>
+          <label>Access token<input name="etsyAccessToken" type="password" required /></label>
+          <label>Shop ID<input name="etsyShopId" type="text" required /></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Shopify (destination)</legend>
+          <label>Store domain
+            <input name="shopifyStoreDomain" type="text" placeholder="my-store.myshopify.com" required />
+          </label>
+          <label>Admin API token<input name="shopifyAdminToken" type="password" placeholder="shpat_..." required /></label>
+        </fieldset>
+
+        <label class="checkbox">
+          <input type="checkbox" name="dryRun" /> Dry run (preview only, write nothing)
+        </label>
+
+        <div class="actions">
+          <button type="button" id="verify-btn" class="secondary">Verify Shopify</button>
+          <button type="submit" id="migrate-btn" class="primary">⚡ Migrate now</button>
+        </div>
+      </form>
+
+      <section id="status" class="status" aria-live="polite"></section>
+
+      <section id="log" class="log" hidden>
+        <div class="progress-bar"><div id="progress-fill"></div></div>
+        <ul id="log-list"></ul>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

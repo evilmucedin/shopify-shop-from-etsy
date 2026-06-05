@@ -23,10 +23,12 @@ without guessing. Until then, discover them from the repo (`package.json`,
 `pyproject.toml`, `Makefile`, etc.) before assuming.
 
 ```bash
-# install:   <fill in once dependencies exist>
-# run:       <fill in once an entry point exists>
-# test:      <fill in once tests exist>
-# lint/fmt:  <fill in once configured>
+# install:   pnpm install
+# run (dev): pnpm dev      # tsx watch, serves PWA on http://localhost:3000
+# build:     pnpm build    # tsc -> dist/
+# run (prod):pnpm start
+# test:      pnpm test     # vitest (clients are mocked; no live API calls)
+# typecheck: pnpm typecheck
 ```
 
 Run the relevant tests/linters before declaring a task done, and report the
