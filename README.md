@@ -45,6 +45,33 @@ Requires Node.js >= 20. This repo uses **pnpm**.
 
 Then open http://localhost:3000 on any device on your network.
 
+## One-command install & run
+
+Don't want to install Node/pnpm yourself? Use the platform scripts in
+`scripts/` — they install everything necessary, build, and start the app, then
+print the URL to open (including a LAN URL for your phone).
+
+| Platform | Command |
+|----------|---------|
+| **Ubuntu / Debian** | `./scripts/install-and-run-ubuntu.sh` |
+| **macOS** | `./scripts/install-and-run-macos.sh` |
+| **Windows** | double-click `scripts\install-and-run-windows.bat` (or `powershell -ExecutionPolicy Bypass -File scripts\install-and-run-windows.ps1`) |
+| **Android phone** (runs on the phone) | install [Termux](https://f-droid.org/packages/com.termux/), then `./scripts/install-and-run-android-termux.sh` |
+
+Override the port with `PORT=8080 ./scripts/install-and-run-macos.sh`.
+
+### Using it on a phone
+
+The app is a web app, so phones don't need a build — just a browser:
+
+1. **Easiest:** run a script on your laptop (same Wi-Fi as the phone). The
+   script prints a `http://<your-lan-ip>:3000` URL — open it in mobile
+   Safari/Chrome and choose **Add to Home Screen** to install the PWA.
+2. **Fully on-device (Android):** use the Termux script above to run the server
+   directly on the phone, then open `http://localhost:3000` in Chrome.
+3. **iPhone/iPad:** there's no on-device Node server; use option 1 (open the
+   laptop's LAN URL and Add to Home Screen).
+
 ## Credentials
 
 You can type credentials into the app, or set them once in a local `.env`
