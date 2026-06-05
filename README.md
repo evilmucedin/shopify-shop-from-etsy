@@ -53,7 +53,7 @@ print the URL to open (including a LAN URL for your phone).
 
 | Platform | Command |
 |----------|---------|
-| **Ubuntu / Debian** | `./scripts/install-and-run-ubuntu.sh` |
+| **Ubuntu / Debian** | `./scripts/install-and-run-ubuntu.sh` (installs Node.js + npm via `apt`) |
 | **macOS** | `./scripts/install-and-run-macos.sh` |
 | **Windows** | double-click `scripts\install-and-run-windows.bat` (or `powershell -ExecutionPolicy Bypass -File scripts\install-and-run-windows.ps1`) |
 | **Android phone** (runs on the phone) | install [Termux](https://f-droid.org/packages/com.termux/), then `./scripts/install-and-run-android-termux.sh` |
