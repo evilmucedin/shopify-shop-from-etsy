@@ -66,6 +66,24 @@ if ($ip) {
   Write-Host ("    - Phone on same Wi-Fi: http://{0}:{1}  (then 'Add to Home Screen')" -f $ip, $Port) -ForegroundColor Green
 }
 
+# Open the app in the default browser once the server answers. Runs as a
+# background job so it can wait while the server starts in the foreground.
+# Set $env:NO_OPEN = "1" to disable.
+if (-not $env:NO_OPEN) {
+  $url = "http://localhost:$Port"
+  Start-Job -ArgumentList $url -ScriptBlock {
+    param($u)
+    for ($i = 0; $i -lt 60; $i++) {
+      try { Invoke-WebRequest "$u/api/health" -UseBasicParsing -TimeoutSec 1 | Out-Null; break }
+      catch { Start-Sleep -Milliseconds 500 }
+    }
+    Start-Process $u
+  } | Out-Null
+  Ok "Opening $url in your browser when ready..."
+} else {
+  Log "Auto-open disabled; open http://localhost:$Port in your browser."
+}
+
 Log "Starting server on port $Port (Ctrl+C to stop)..."
 $env:PORT = $Port
 pnpm start

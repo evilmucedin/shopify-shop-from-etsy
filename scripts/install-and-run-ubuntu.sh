@@ -43,5 +43,6 @@ log "Building…"
 npm run build
 
 print_access_urls
+open_browser_when_ready "http://localhost:${PORT}"
 log "Starting server on port ${PORT} (Ctrl+C to stop)…"
 PORT="$PORT" npm start

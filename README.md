@@ -58,7 +58,13 @@ print the URL to open (including a LAN URL for your phone).
 | **Windows** | double-click `scripts\install-and-run-windows.bat` (or `powershell -ExecutionPolicy Bypass -File scripts\install-and-run-windows.ps1`) |
 | **Android phone** (runs on the phone) | install [Termux](https://f-droid.org/packages/com.termux/), then `./scripts/install-and-run-android-termux.sh` |
 
-Override the port with `PORT=8080 ./scripts/install-and-run-macos.sh`.
+Each script installs deps, builds, **opens the app in your default browser**
+once the server is ready, and keeps it running (Ctrl+C to stop).
+
+Override the port with `PORT=8080 ./scripts/install-and-run-macos.sh`, or skip
+auto-opening the browser with `NO_OPEN=1 ./scripts/install-and-run-macos.sh`
+(`$env:NO_OPEN="1"` on Windows). Auto-open is also skipped automatically when no
+desktop browser opener is available (e.g. a headless server or Termux).
 
 ### Using it on a phone
 

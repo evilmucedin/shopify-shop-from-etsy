@@ -44,8 +44,47 @@ install_build_run() {
   log "Building…"
   pnpm build
   print_access_urls
+  open_browser_when_ready "http://localhost:${PORT}"
   log "Starting server on port ${PORT} (Ctrl+C to stop)…"
   PORT="$PORT" pnpm start
+}
+
+# Open the app in the default browser once the server answers. Runs in the
+# background so it can wait for readiness while the server starts in the
+# foreground. Set NO_OPEN=1 (or BROWSER=none) to disable.
+open_browser_when_ready() {
+  local url="$1"
+  if [ -n "${NO_OPEN:-}" ] || [ "${BROWSER:-}" = "none" ]; then
+    log "Auto-open disabled; open ${url} in your browser."
+    return
+  fi
+
+  # Detect a platform browser opener.
+  local opener=""
+  if have xdg-open; then opener="xdg-open"
+  elif have open; then opener="open"                  # macOS
+  elif have termux-open-url; then opener="termux-open-url"  # Android/Termux
+  elif have sensible-browser; then opener="sensible-browser"
+  fi
+  if [ -z "$opener" ]; then
+    warn "No browser opener found; open ${url} manually."
+    return
+  fi
+
+  (
+    # Wait for the server to respond before launching the browser.
+    local ready=""
+    for _ in $(seq 1 60); do
+      if have curl && curl -fsS "${url}/api/health" >/dev/null 2>&1; then ready=1; break; fi
+      if have wget && wget -qO- "${url}/api/health" >/dev/null 2>&1; then ready=1; break; fi
+      # No curl/wget? give the server a moment, then just open.
+      if ! have curl && ! have wget; then sleep 2; ready=1; break; fi
+      sleep 0.5
+    done
+    [ -n "$ready" ] || true
+    log "Opening ${url} in your browser…"
+    "$opener" "$url" >/dev/null 2>&1 || warn "Could not open a browser automatically; visit ${url}."
+  ) &
 }
 
 # Best-effort local IP so a phone on the same Wi-Fi can open the app.
