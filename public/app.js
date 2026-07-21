@@ -6,6 +6,8 @@ const logList = document.getElementById("log-list");
 const progressFill = document.getElementById("progress-fill");
 const migrateBtn = document.getElementById("migrate-btn");
 const verifyBtn = document.getElementById("verify-btn");
+const exportBtn = document.getElementById("export-btn");
+const exportFormat = document.getElementById("export-format");
 
 const LS_KEY = "etsy2shopify.creds";
 
@@ -70,6 +72,58 @@ verifyBtn.addEventListener("click", async () => {
     setStatus(String(err), "err");
   }
 });
+
+// CSV export: needs only Etsy creds, streams a file download back to the browser.
+exportBtn.addEventListener("click", async () => {
+  persist();
+  const creds = readCreds();
+  const format = exportFormat.value;
+  exportBtn.disabled = true;
+  setStatus("Fetching listings from Etsy and building CSV…");
+  try {
+    const res = await fetch("/api/export", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ etsy: creds.etsy, format }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || `Export failed (${res.status})`);
+    }
+    const count = res.headers.get("X-Product-Count");
+    const blob = await res.blob();
+    downloadBlob(blob, filenameFrom(res, format));
+    const tool = format === "matrixify" ? "Matrixify" : "the Shopify Store Importer";
+    setStatus(
+      `CSV downloaded ✓${count ? ` (${count} listing${count === "1" ? "" : "s"})` : ""} — now import it with ${tool}.`,
+      "ok",
+    );
+  } catch (err) {
+    setStatus(String(err), "err");
+  } finally {
+    exportBtn.disabled = false;
+  }
+});
+
+// Read the server-suggested filename, falling back to a format-specific default.
+function filenameFrom(res, format) {
+  const cd = res.headers.get("Content-Disposition") || "";
+  const match = cd.match(/filename="?([^"]+)"?/i);
+  if (match) return match[1];
+  return format === "matrixify" ? "etsy-shopify-matrixify.csv" : "etsy-shopify-products.csv";
+}
+
+// Trigger a client-side download for a Blob (keeps tokens out of URLs).
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();

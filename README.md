@@ -1,9 +1,18 @@
 # shopify-shop-from-etsy
 
-One-click app that **fills a Shopify shop from an existing Etsy shop**. Enter
-your Etsy and Shopify credentials, press **Migrate now**, and the app copies as
-much useful data as possible (listings, descriptions, prices, inventory, tags,
+One-click app that **fills a Shopify shop from an existing Etsy shop**. It copies
+as much useful data as possible (listings, descriptions, prices, inventory, tags,
 SKUs and images) from Etsy into Shopify.
+
+There are **two ways to bring your listings over**:
+
+1. **Export a CSV** (recommended, easiest) — enter only your Etsy credentials
+   and download a product CSV, then import it in Shopify via the built-in
+   **Store Importer** or via **Matrixify** for large catalogs. No Shopify API
+   token or custom app required.
+2. **Direct API migration** — enter your Etsy *and* Shopify credentials and
+   press **Migrate now** to write products straight into Shopify via the Admin
+   API.
 
 ## Runs everywhere
 
@@ -22,9 +31,10 @@ Etsy Open API v3  ──read──▶  Migrator  ──write──▶  Shopify A
 | Layer | Path | Responsibility |
 |-------|------|----------------|
 | Etsy client (read) | `src/etsy/client.ts` | Fetch + paginate listings and images, normalize them |
+| CSV export | `src/export/csv.ts` | Turn normalized listings into a Shopify / Matrixify product CSV |
 | Shopify client (write) | `src/shopify/client.ts` | Verify creds, create products/variants/images |
 | Migrator | `src/migrate/migrator.ts` | Orchestrate the one-click run, per-item resilience, progress |
-| API server | `src/server.ts` | `/api/verify`, `/api/migrate` (SSE progress), static PWA |
+| API server | `src/server.ts` | `/api/verify`, `/api/migrate` (SSE progress), `/api/export` (CSV), static PWA |
 | PWA UI | `public/` | Responsive form, live progress, installable (manifest + service worker) |
 
 Network access in both clients is injected, so all logic is unit-tested against
@@ -88,7 +98,8 @@ You can type credentials into the app, or set them once in a local `.env`
 - `ETSY_ACCESS_TOKEN` — OAuth token with the `listings_r` scope
 - `ETSY_SHOP_ID` — the numeric shop id
 
-**Shopify (write side)** — a [custom app](https://help.shopify.com/en/manual/apps/app-types/custom-apps)
+**Shopify (write side)** — *only needed for the direct API migration; the CSV
+export needs no Shopify credentials.* A [custom app](https://help.shopify.com/en/manual/apps/app-types/custom-apps)
 with Admin API access:
 - `SHOPIFY_STORE_DOMAIN` — e.g. `my-store.myshopify.com`
 - `SHOPIFY_ADMIN_TOKEN` — Admin API access token (`shpat_...`) with
@@ -99,12 +110,32 @@ with Admin API access:
 
 ## What gets copied
 
-For each active Etsy listing the app creates a Shopify product with: title,
+For each active Etsy listing the app produces a Shopify product with: title,
 description (converted to HTML), tags, product type, a default variant with
-price + SKU + inventory quantity, and all listing images.
+price + SKU + inventory quantity, and all listing images. This is true for both
+the CSV export and the direct API migration.
 
-Use the **Dry run** checkbox to preview how many listings would be migrated
-without writing anything to Shopify.
+### CSV export (Store Importer / Matrixify)
+
+Only your **Etsy** credentials are needed. Pick the import tool in the UI and
+press **Export CSV**:
+
+- **Shopify Store Importer** — a standard Shopify product CSV. Import it in the
+  Shopify admin under **Products → Import**. Best for small/medium catalogs.
+- **Matrixify** — the same columns plus a leading `Command: MERGE` column that
+  [Matrixify](https://apps.shopify.com/matrixify) uses to upsert. Install the
+  app, then **Matrixify → Import** and drop the file. Best for large catalogs
+  (thousands of products) that would time out the built-in importer.
+
+Each listing becomes one product row; extra images are emitted as additional
+rows sharing the same `Handle` (the Shopify convention). Prices are written in
+the listing's own amount — make sure your Shopify store currency matches.
+
+### Direct API migration
+
+Enter both Etsy and Shopify credentials and press **Migrate now** to write
+products via the Admin API. Use the **Dry run** checkbox to preview how many
+listings would be migrated without writing anything to Shopify.
 
 ## Roadmap / not yet covered
 
