@@ -2,10 +2,11 @@ import { fileURLToPath } from "node:url";
 import path from "node:path";
 import express from "express";
 import dotenv from "dotenv";
-import type { MigrationCredentials } from "./types.js";
+import type { EtsyCredentials, MigrationCredentials } from "./types.js";
 import { EtsyClient } from "./etsy/client.js";
 import { ShopifyClient } from "./shopify/client.js";
 import { migrate } from "./migrate/migrator.js";
+import { buildProductCsv } from "./export/csv.js";
 
 dotenv.config();
 
@@ -41,6 +42,24 @@ function resolveCredentials(body: any): MigrationCredentials | { error: string }
   if (missing.length) return { error: `Missing credentials: ${missing.join(", ")}` };
 
   return { etsy, shopify };
+}
+
+/**
+ * Resolve just the Etsy (read-side) credentials. Used by the CSV export path,
+ * which needs no Shopify API access at all.
+ */
+function resolveEtsyCredentials(body: any): EtsyCredentials | { error: string } {
+  const etsy = {
+    apiKey: body?.etsy?.apiKey || process.env.ETSY_API_KEY || "",
+    accessToken: body?.etsy?.accessToken || process.env.ETSY_ACCESS_TOKEN || "",
+    shopId: body?.etsy?.shopId || process.env.ETSY_SHOP_ID || "",
+  };
+  const missing: string[] = [];
+  if (!etsy.apiKey) missing.push("etsy.apiKey");
+  if (!etsy.accessToken) missing.push("etsy.accessToken");
+  if (!etsy.shopId) missing.push("etsy.shopId");
+  if (missing.length) return { error: `Missing credentials: ${missing.join(", ")}` };
+  return etsy;
 }
 
 app.get("/api/health", (_req, res) => {
@@ -92,6 +111,34 @@ app.post("/api/migrate", async (req, res) => {
     send("error", { error: err instanceof Error ? err.message : String(err) });
   } finally {
     res.end();
+  }
+});
+
+/**
+ * Export listings as a Shopify-importable product CSV. This path needs only
+ * Etsy credentials — no Shopify API access — so shops can bring listings over
+ * via Shopify's built-in Store Importer, or via Matrixify for large catalogs.
+ */
+app.post("/api/export", async (req, res) => {
+  const etsy = resolveEtsyCredentials(req.body);
+  if ("error" in etsy) return res.status(400).json({ ok: false, error: etsy.error });
+
+  const matrixify = req.body?.format === "matrixify" || Boolean(req.body?.matrixify);
+
+  try {
+    const client = new EtsyClient(etsy);
+    const products = await client.fetchNormalizedProducts();
+    const csv = buildProductCsv(products, { matrixify });
+
+    const filename = matrixify
+      ? "etsy-shopify-matrixify.csv"
+      : "etsy-shopify-products.csv";
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("X-Product-Count", String(products.length));
+    res.send(csv);
+  } catch (err) {
+    res.status(502).json({ ok: false, error: err instanceof Error ? err.message : String(err) });
   }
 });
 

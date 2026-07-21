@@ -71,6 +71,42 @@ button:disabled { opacity: 0.55; cursor: progress; }
 .primary { background: var(--accent-2); color: #fff; }
 .secondary { background: #2c3540; color: var(--text); }
 
+/* CSV export — the headline path, so give it an accented card. */
+.export-card {
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(47, 111, 79, 0.18), var(--card));
+  padding: 1rem 1.1rem 1.15rem;
+  margin: 0 0 1rem;
+}
+.export-card h2 { margin: 0 0 0.35rem; font-size: 1.15rem; }
+.export-lead { margin: 0 0 0.85rem; color: var(--text); font-size: 0.92rem; }
+.export-format { color: var(--muted); }
+.export-format select {
+  width: 100%;
+  margin-top: 0.3rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #33404d;
+  background: #0e1318;
+  color: var(--text);
+  font-size: 1rem;
+}
+#export-btn { width: 100%; margin-top: 0.9rem; }
+.export-hint { margin: 0.75rem 0 0; color: var(--muted); font-size: 0.8rem; }
+.export-hint em { color: var(--text); font-style: normal; }
+
+/* Direct-API migration is now secondary: tuck it behind a disclosure. */
+.advanced { margin: 0 0 1rem; }
+.advanced > summary {
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+}
+.advanced > summary:hover { color: var(--text); }
+.advanced[open] > summary { margin-bottom: 0.75rem; }
+
 .status { margin-top: 1rem; min-height: 1.25rem; }
 .status.ok { color: var(--ok); }
 .status.err { color: var(--err); }

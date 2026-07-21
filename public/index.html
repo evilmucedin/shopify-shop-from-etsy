@@ -23,22 +23,46 @@
           <label>Shop ID<input name="etsyShopId" type="text" required /></label>
         </fieldset>
 
-        <fieldset>
-          <legend>Shopify (destination)</legend>
-          <label>Store domain
-            <input name="shopifyStoreDomain" type="text" placeholder="my-store.myshopify.com" required />
+        <!-- Path 1: CSV export. Prominent because it needs no Shopify API. -->
+        <section class="export-card">
+          <h2>⬇ Bring listings over with a CSV</h2>
+          <p class="export-lead">
+            The easiest way — <strong>no Shopify API token needed</strong>. Export your
+            Etsy listings as a product CSV, then import it in Shopify.
+          </p>
+          <label class="export-format">Import tool
+            <select name="exportFormat" id="export-format">
+              <option value="shopify">Shopify Store Importer — small / medium catalogs</option>
+              <option value="matrixify">Matrixify — large catalogs</option>
+            </select>
           </label>
-          <label>Admin API token<input name="shopifyAdminToken" type="password" placeholder="shpat_..." required /></label>
-        </fieldset>
+          <button type="button" id="export-btn" class="primary">⬇ Export CSV</button>
+          <p class="export-hint" id="export-hint">
+            Store Importer: <em>Shopify admin → Products → Import</em>. Matrixify:
+            install the app, then <em>Matrixify → Import</em> and drop the file.
+          </p>
+        </section>
 
-        <label class="checkbox">
-          <input type="checkbox" name="dryRun" /> Dry run (preview only, write nothing)
-        </label>
+        <details class="advanced">
+          <summary>Or migrate directly via the Shopify API (advanced)</summary>
 
-        <div class="actions">
-          <button type="button" id="verify-btn" class="secondary">Verify Shopify</button>
-          <button type="submit" id="migrate-btn" class="primary">⚡ Migrate now</button>
-        </div>
+          <fieldset>
+            <legend>Shopify (destination)</legend>
+            <label>Store domain
+              <input name="shopifyStoreDomain" type="text" placeholder="my-store.myshopify.com" />
+            </label>
+            <label>Admin API token<input name="shopifyAdminToken" type="password" placeholder="shpat_..." /></label>
+          </fieldset>
+
+          <label class="checkbox">
+            <input type="checkbox" name="dryRun" /> Dry run (preview only, write nothing)
+          </label>
+
+          <div class="actions">
+            <button type="button" id="verify-btn" class="secondary">Verify Shopify</button>
+            <button type="submit" id="migrate-btn" class="secondary">⚡ Migrate now</button>
+          </div>
+        </details>
       </form>
 
       <section id="status" class="status" aria-live="polite"></section>
